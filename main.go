@@ -27,7 +27,14 @@ func main() {
 		if update.ChatMember == nil {
 			continue
 		}
-		msg := tgbotapi.NewMessage(update.ChatMember.Chat.ID, "Welcome "+update.ChatMember.NewChatMember.User.FirstName)
+		var msg tgbotapi.MessageConfig
+
+		if update.ChatMember.NewChatMember.WasKicked() {
+			msg = tgbotapi.NewMessage(update.ChatMember.Chat.ID, "GoodBye "+update.ChatMember.NewChatMember.User.FirstName)
+		} else {
+			msg = tgbotapi.NewMessage(update.ChatMember.Chat.ID, "Welcome "+update.ChatMember.NewChatMember.User.FirstName)
+		}
+
 		if _, err := bot.Send(msg); err != nil {
 			panic(err)
 		}
