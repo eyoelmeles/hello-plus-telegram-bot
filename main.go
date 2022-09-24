@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/eyoelmeles/hello-plus-telegram-bot/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -24,19 +25,25 @@ func main() {
 
 	for update := range updates {
 
-		if update.ChatMember == nil {
-			continue
-		}
 		var msg tgbotapi.MessageConfig
-
-		if update.ChatMember.NewChatMember.WasKicked() {
-			msg = tgbotapi.NewMessage(update.ChatMember.Chat.ID, "GoodBye "+update.ChatMember.NewChatMember.User.FirstName)
+		if update.ChatMember != nil {
+			if update.ChatMember.NewChatMember.HasLeft() || update.ChatMember.NewChatMember.Status == "kicked" {
+				msg = tgbotapi.NewMessage(update.ChatMember.Chat.ID, "GoodBye "+update.ChatMember.NewChatMember.User.FirstName)
+			} else {
+				msg = tgbotapi.NewMessage(update.ChatMember.Chat.ID, "Welcome "+update.ChatMember.NewChatMember.User.FirstName)
+			}
+		} else if update.ChannelPost != nil {
+			msg = tgbotapi.NewMessage(update.ChannelPost.Chat.ID, utils.Profanity(update.ChannelPost.Text))
+			tgbotapi.NewDeleteMessage(update.ChannelPost.Chat.ID, update.ChannelPost.MessageID)
+		} else if update.Message != nil {
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, utils.Profanity(update.Message.Text))
+			tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
 		} else {
-			msg = tgbotapi.NewMessage(update.ChatMember.Chat.ID, "Welcome "+update.ChatMember.NewChatMember.User.FirstName)
+			continue
 		}
 
 		if _, err := bot.Send(msg); err != nil {
 			panic(err)
 		}
-	} 
+	}
 }
