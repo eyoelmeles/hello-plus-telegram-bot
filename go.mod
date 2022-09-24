@@ -1,4 +1,4 @@
-module github.com/eyoelmeles/hello-plug-telegram-bot
+module github.com/eyoelmeles/hello-plus-telegram-bot
 
 go 1.19
 
